@@ -148,7 +148,7 @@ local getToolBar(theme, overrides={}) =
 
     // 横向候选文字栏调式
     horizontalCandidatesStyle: {
-      insets: { left: 5, right: 10, },
+      insets: { left: 5, right: 10 },
       backgroundStyle: 'toolbarBackgroundStyle',
     },
     horizontalCandidatesLayout: [
@@ -157,7 +157,7 @@ local getToolBar(theme, overrides={}) =
           subviews: [
             { Cell: 'horizontalCandidates' },
             // { Cell: 'clearPreeditButton' },
-            if Settings.horizon_candidate_button == 1 then { Cell: 'expandButton' } else if Settings.horizon_candidate_button == 2 then { Cell: 'toolbarButtonHideStyle'} else {},
+            if Settings.horizon_candidate_button == 1 then { Cell: 'expandButton' } else if Settings.horizon_candidate_button == 2 then { Cell: 'toolbarButtonHideStyle' } else {},
           ],
         },
       },
@@ -259,17 +259,20 @@ local getToolBar(theme, overrides={}) =
       shortcut: '#keyboardMenu',
     }),
 
-    toolbarButtonOpenAppMenuForegroundStyle: makeToolbarSystemImageForegroundStyle('hexagon.righthalf.filled'),
+    //    toolbarButtonOpenAppMenuForegroundStyle: makeToolbarSystemImageForegroundStyle('hexagon.righthalf.filled'),
+    toolbarButtonOpenAppMenuForegroundStyle: makeToolbarSystemImageForegroundStyle('swirl.circle.righthalf.filled'),
     // menu_or_panel 在固定按钮场景下会直接引用这个样式对象。
     toolbarButtonPanelStyle: makeToolbarButtonStyle('toolbarButtonPanelForegroundStyle', {
       floatKeyboardType: 'panel',
     }),
-    toolbarButtonPanelForegroundStyle: makeToolbarSystemImageForegroundStyle('hexagon.righthalf.filled'),
+    //    toolbarButtonPanelForegroundStyle: makeToolbarSystemImageForegroundStyle('hexagon.righthalf.filled'),
+    toolbarButtonPanelForegroundStyle: makeToolbarSystemImageForegroundStyle('swirl.circle.righthalf.filled'),
     // iPad 首位固定按钮在 toolbar_menu=false 时使用这个样式，动作是直接打开 App。
     toolbarButtonOpenAppStyle: makeToolbarButtonStyle('toolbarButtonOpenAppForegroundStyle', {
       openURL: 'hamster3://',
     }),
-    toolbarButtonOpenAppForegroundStyle: makeToolbarSystemImageForegroundStyle('hexagon.righthalf.filled'),
+    //    toolbarButtonOpenAppForegroundStyle: makeToolbarSystemImageForegroundStyle('hexagon.righthalf.filled'),
+    toolbarButtonOpenAppForegroundStyle: makeToolbarSystemImageForegroundStyle('swirl.circle.righthalf.filled'),
 
     // 常用动作与键盘切换
     toolbarButtonNoteStyle: makeToolbarButtonStyle('toolbarButton3ForegroundStyle', {
@@ -279,7 +282,9 @@ local getToolBar(theme, overrides={}) =
     toolbarButtonScriptStyle: makeToolbarButtonStyle('toolbarButtonScriptForegroundStyle', {
       shortcutCommand: '#toggleScriptView',
     }),
-    toolbarButtonScriptForegroundStyle: makeToolbarSystemImageForegroundStyle(if Settings.fix_sf_symbol then 's.circle.fill' else 'peruviansolessign.circle.fill'),
+    // 工具栏:脚本图标
+    // toolbarButtonScriptForegroundStyle: makeToolbarSystemImageForegroundStyle(if Settings.fix_sf_symbol then 's.circle.fill' else 'peruviansolessign.circle.fill'),
+    toolbarButtonScriptForegroundStyle: makeToolbarSystemImageForegroundStyle(if Settings.fix_sf_symbol then 's.circle.fill' else 'apple.terminal'),
     toolbarButtonEmojiStyle: makeToolbarButtonStyle('toolbarButtonEmojiForegroundStyle', { keyboardType: 'emojis' }),
     toolbarButtonEmojiForegroundStyle: makeToolbarSystemImageForegroundStyle('face.dashed.fill'),
     toolbarButtonSymbolStyle: makeToolbarButtonStyle('toolbarButtonSymbolForegroundStyle', { keyboardType: 'symbolic' }),

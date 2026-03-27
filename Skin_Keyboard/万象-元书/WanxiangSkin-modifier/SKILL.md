@@ -42,6 +42,9 @@ Use it when the user asks to:
 - adjust toolbar slide direction such as `content_right_to_left`
 - adjust `toolbar_config.toolbar_height` or `toolbar_config.ipad.toolbar_height`
 - adjust `horizon_candidate_button` for the horizontal candidate trailing button
+- adjust non-26 English keyboard escape paths such as swiping `en2cnButton` into `temp_pinyin`
+- add or adjust temporary keyboard wrappers such as `temp_pinyin`
+- adjust `temp_pinyin`-specific space-key marker text or swipe behavior
 - update README or module documentation after code changes
 - fix regressions inside the selected keyboard root
 
@@ -65,6 +68,7 @@ Use it when the user asks to:
    - `jsonnet/keyboards/common/systemKeys26/*` when 26-key system-key modules or assembly should be shared across keyboards
    - `jsonnet/keyboards/*/builder.libsonnet` only if specs are not enough
    - `jsonnet/keyboards/*/layout.libsonnet` only if button placement changes
+   - `jsonnet/keyboards/tempPinyin/iPhone.libsonnet` when a temporary wrapper keyboard should reuse pinyin 26-key output but override only a few buttons
    - `jsonnet/shared/toolbar/*` for toolbar behavior or rendering
    - `jsonnet/keyboards/common/layoutAssembly/keyboardLayoutAssembly.libsonnet` only when the shared layout assembly path itself changes
    - `jsonnet/shared/functionButtons/*` for function-row behavior or styling, including `functionRowPatch.libsonnet` when the function row is inserted into layout
@@ -73,6 +77,13 @@ Use it when the user asks to:
    - for numeric bottom-row swaps, prefer `jsonnet/Custom.libsonnet` + `jsonnet/keyboards/numeric9/layout.libsonnet`
    - for `123Button` interaction changes on 26-key / 14-key / 18-key, prefer `jsonnet/Custom.libsonnet` + `jsonnet/keyboards/common/systemKeys26/systemKeysSwitcher.libsonnet`; only touch `jsonnet/keyboards/alphabetic26/systemKeys.libsonnet` when English 26-key should match
    - for iPad `123Button`, use `jsonnet/keyboards/common/keyboard26/iPadBuilder.libsonnet`
+- for iPad 26-key row structure changes such as Tab, dual Shift, dual 123, bottom-row comma placement, swipe-up period, or dismiss-key placement, edit `jsonnet/keyboards/common/keyboard26/layout.libsonnet` and `jsonnet/keyboards/common/keyboard26/iPadBuilder.libsonnet` together
+- for iPad 26-key shift notification parity, bottom-row comma display, or landscape-only spacing, prefer `jsonnet/keyboards/common/keyboard26/iPadBuilder.libsonnet`
+- for iPad Chinese/English 26-key letter-size alignment, edit both `jsonnet/keyboards/pinyin26/iPad.libsonnet` and `jsonnet/keyboards/alphabetic26/iPad.libsonnet`
+   - for iPad 26-key edge spacing or per-key width adjustments such as the second-row `a` gap or enter width, edit `jsonnet/keyboards/common/keyboard26/layout.libsonnet` and `jsonnet/keyboards/common/keyboard26/iPadBuilder.libsonnet` together
+   - for non-26 English keyboard swipes back into pinyin 26-key, prefer `jsonnet/keyboards/alphabetic26/systemKeys.libsonnet` plus a thin wrapper under `jsonnet/keyboards/tempPinyin/`
+- when matching iPad row-2 letter visuals, keep all visible letter widths aligned; only `a` should use extra outer width with right-aligned bounds for left-side gap
+- for iPad third-row edge-balance changes, keep the middle seven letter keys stable and adjust only left Shift / Tab / right Shift in `jsonnet/keyboards/common/keyboard26/layout.libsonnet` and `jsonnet/keyboards/common/keyboard26/iPadBuilder.libsonnet`
    - `button_123_config.show_swipe_indicators` only controls 123Button swipe-corner indicators; it must not change swipe actions themselves
    - for 9-key / numeric `symbolButton` interaction changes, prefer `jsonnet/Custom.libsonnet` + `jsonnet/shared/buttonHelpers/buttonInteraction.libsonnet` + `jsonnet/keyboards/pinyin9/builder.libsonnet` / `jsonnet/keyboards/numeric9/builder.libsonnet`; do not touch bottom-row swap logic unless placement itself changes
    - for shared layout assembly changes, prefer `jsonnet/keyboards/common/layoutAssembly/keyboardLayoutAssembly.libsonnet` + `jsonnet/shared/data/layoutData.libsonnet`; only touch `jsonnet/shared/functionButtons/functionRowPatch.libsonnet` when the function-row insertion rule itself changes

@@ -36,6 +36,7 @@ WanxiangSkin/
 
 当前目录：
 - `jsonnet/keyboards/pinyin26/`
+- `jsonnet/keyboards/tempPinyin/`
 - `jsonnet/keyboards/alphabetic26/`
 - `jsonnet/keyboards/pinyin18/`
 - `jsonnet/keyboards/pinyin14/`
@@ -158,6 +159,18 @@ WanxiangSkin/
 ### Toolbar 配置
 - `toolbar_config.toolbar_height`
   - iPhone 工具栏高度。
+
+### 非 26 键英文键盘切回拼音 26 键
+- 9 键、14 键、18 键使用英文键盘时：
+  - `en2cnButton` 上划切到 `temp_pinyin`
+  - `spaceButton`、`spaceFirstButton`、`spaceSecondButton` 上划发送 `Shift+space`
+- `temp_pinyin` 是一个临时拼音 26 键入口：
+  - 复用拼音 26 键主体
+  - `cn2enButton` 点击返回英文键盘
+  - `cn2enButton` 不挂通知
+  - `cn2enButton` 前景改为返回语义的 SF Symbol
+  - `spaceButton` / `spaceSecondButton` 固定显示 `RIME`
+  - `spaceButton` / `spaceFirstButton` / `spaceSecondButton` 上划发送 `Shift+space`
 - `toolbar_config.toolbar_menu`
   - 是否启用键盘菜单页面。
 - `toolbar_config.content_right_to_left`
@@ -173,6 +186,16 @@ WanxiangSkin/
 - `toolbar_config.ipad.content_right_to_left`
 - `toolbar_config.ipad.center_slide`
   - iPad toolbar 配置。
+
+### iPad 26 键布局
+- 当前 iPad 26 键使用独立的四行布局。
+- 第一行右侧为删除键。
+- 第二行字母可视宽度与其他字母保持一致，仅在 `a` 键左侧保留留白，右侧为稍窄的回车键。
+- 第三行左 Shift 宽度与右侧 `Tab + Shift` 总宽度对齐，右 Shift 左侧追加 Tab。
+- 第四行从左到右为 Globe、123、逗号、空格、中英切换、123、收起键盘。
+- 空格左侧逗号键保留上划句号。
+- 右侧 Shift 与左侧 Shift 保持相同的通知能力。
+- 中英文 iPad 26 键统一使用相同的 26 键字母字号覆写。
 - 工具栏可选按钮新增 `simplified_traditional`，用于触发 `#简繁切换`。
 - 工具栏可选按钮新增 `undo` / `redo`，分别触发 `#undo` 与 `#redo`。
 

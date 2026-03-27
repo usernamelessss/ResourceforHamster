@@ -104,10 +104,14 @@
   tips_button_action: { sendKeys: 'Break' },
 
   // 空格按键是否显示“万象”标识
-  show_wanxiang: true,
+  // [默认设置]
+  // show_wanxiang: true,
+  show_wanxiang: false,
 
   // 是否启用 iOS26 风格（统一按键颜色，Light模式下调整高亮）
+  // [默认设置]
   ios26_style: true,
+  // ios26_style: false,
 
   // 字号配置
   font_size_config: {
@@ -128,17 +132,19 @@
   button_insets: {
     // 若需要间隔稍大，可使用:
     // { top: 5, left: 3, bottom: 5, right: 3 }
-     portrait: { top: 3.8, left: 2.5, right: 2.5, bottom: 3.8 },
-//    portrait: { top: 5, left: 3, right: 5, bottom: 3 },
+    // [默认配置]
+    portrait: { top: 3.8, left: 2.5, right: 2.5, bottom: 3.8 },
 
     // 若需要间隔稍大，可按需调整:
     // { top: 3, left: 2, bottom: 3, right: 2 }
-	  landscape: { top: 2.2, left: 1.8, bottom: 2.2, right: 1.8 },
-//    landscape: { top: 3, left: 2, bottom: 3, right: 2 },
+    // [默认配置]
+    landscape: { top: 2.2, left: 1.8, bottom: 2.2, right: 1.8 },
   },
 
   // 按键圆角，建议 7 / 8 / 8.5
-  cornerRadius: 8,
+  // [默认设置]
+  // cornerRadius: 8,
+  cornerRadius: 7,
 
   // shift 特殊动作配置（仅用于26键）
   shift_config: {
@@ -146,7 +152,10 @@
     enable_preedit: true,
 
     // shift 在预编辑状态的动作
-    preedit_action: { character: '/' },
+    // [默认设置]
+    // preedit_action: { character: '/' },
+    // ※适配万象拼音 PRO 的 symkey 绑定处罚前置设定:\
+    preedit_action: { character: '\\' },
 
     // shift 在预编辑状态显示的 sf symbol
     // 为空时使用默认符号
@@ -170,12 +179,15 @@
     // true: 使用 app 的 keyboardMenu
     toolbar_menu: false,
 
-    // 工具栏高度（在开启comment的情况下，该高度比较合适，如果不开启，使用30或者40都可以）
+    // 工具栏高度（在开启comment的情况下，该高度（默认50）比较合适，如果不开启，使用30或者40都可以）
     toolbar_height: 50,
 
     // 工具栏滑动区域按钮显示方向
+    // [默认设置]
     content_right_to_left: false,
+    // content_right_to_left: true,
 
+    // [默认设置]
     // segmented:
     // 固定按钮 + 左侧横向滑动 + 固定中间按钮 + 右侧横向滑动 + 固定收起按钮
     //
@@ -225,6 +237,7 @@
         'clipboard',
         'symbol',
         'emoji',
+        'simplified_traditional',
         // 如有需要添加的按钮直接在后面添加即可
       ],
       right_fixed: 'hide',
@@ -236,7 +249,7 @@
       left_fixed: 'menu_or_panel',
       center_slide: [
         'script',
-        'google',
+        //'google',
         'note',
         'clipboard',
         'emoji',
@@ -244,8 +257,10 @@
         'skin_adjust',
         'keyboard_settings',
         'keyboard_skins',
-        'baidu',
-        'bing',
+        //'baidu',
+        //'bing',
+        'undo',
+        'redo',
         // 如有需要添加的按钮直接在后面添加即可
       ],
       right_fixed: 'hide',
@@ -303,6 +318,46 @@
         'skin_adjust',
         'keyboard_performance',
       ],
+    },
+  },
+  // 自定义指定按键的偏移量(调整按键前景显示位置)
+  // ※ 使用说明:覆盖默认的按键上划 SF 的偏移,让用户可以自定义 SF 位置.
+  //                      偏移定位参考系
+  //           (0,0) -------------------- (1,0)
+  //              |                                    |
+  //              |                                    |
+  //              |                                    |
+  //           (0,1) -------------------- -(1,1)
+  //  比如:
+  //           swipe_center_overrides: {
+  //             pinyin26: {
+  //               down: {
+  //                    z: { x: 0.5, y: 0.8 },
+  //                    x: { x: 0.5, y: 0.8 },
+  //                    c: { x: 0.5, y: 0.8 },
+  //                    v: { x: 0.5, y: 0.8 },
+  //                    b: { x: 0.5, y: 0.8 },
+  //                    n: { x: 0.5, y: 0.8 },
+  //                    m: { x: 0.5, y: 0.8 },
+  //               },
+  //             },
+  //           },
+  // 仅影响 26 键字母键的 swipe 标签位置
+  // - pinyin26: 中文 26 键
+  // - alphabetic26: 英文 26 键
+  // - up: 左上角 / 上划
+  // - down: 右上角 / 下划
+  // key 为按键名，例如 q / w / e / ... / m
+  // value 为 center 坐标，范围通常使用 0~1
+  // ※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※
+  swipe_center_overrides: {
+    pinyin26: {
+      up: {},
+      down: {},
+    },
+    alphabetic26: {
+      up: {},
+      down: {},
     },
   },
 }

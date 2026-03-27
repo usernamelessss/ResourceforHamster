@@ -91,6 +91,23 @@ Notes:
 4. If the change affects shared 26-key system-key modules or assembly, inspect `jsonnet/keyboards/common/systemKeys26/`.
 5. Only touch the top-level 26-key builder if the change affects assembly outside the shared system-key modules.
 
+## Add a temporary keyboard wrapper
+
+1. Add a new output mapping in:
+   - `jsonnet/main.jsonnet`
+   - `<keyboard-root>/config.yaml`
+2. Create a thin wrapper under:
+   - `jsonnet/keyboards/tempPinyin/iPhone.libsonnet`
+3. Reuse the base keyboard output and override only the minimal button fields.
+4. For the current `temp_pinyin` pattern:
+   - reuse `jsonnet/keyboards/pinyin26/iPhone.libsonnet`
+   - override `cn2enButton.action`
+   - remove `cn2enButton.notification`
+   - replace `cn2enButtonForegroundStyle` with a system-image style
+   - override `spaceButton` / `spaceFirstButton` / `spaceSecondButton` when temp-pinyin needs a fixed marker text or dedicated swipe-up action
+5. If non-26 English keyboards should swipe into this wrapper, also edit:
+   - `jsonnet/keyboards/alphabetic26/systemKeys.libsonnet`
+
 ## Change 123Button interaction
 
 1. If the interaction should be user-configurable, expose it in:
@@ -101,7 +118,13 @@ Notes:
    - `jsonnet/keyboards/alphabetic26/systemKeys.libsonnet`
 4. If iPad 26-key should match, also edit:
    - `jsonnet/keyboards/common/keyboard26/iPadBuilder.libsonnet`
-5. Keep the behavior split clear:
+   - `jsonnet/keyboards/common/keyboard26/layout.libsonnet`
+   - use `iPadBuilder.libsonnet` for iPad-only system-key actions or bottom-row punctuation behavior
+   - use `iPadBuilder.libsonnet` for right Shift notification parity or landscape-only spacing adjustments
+5. If only iPad Chinese/English letter size should match, also inspect:
+   - `jsonnet/keyboards/pinyin26/iPad.libsonnet`
+   - `jsonnet/keyboards/alphabetic26/iPad.libsonnet`
+6. Keep the behavior split clear:
    - slide mode -> `type: 'horizontalSymbols'` + dataSource
    - long-press mode -> `hintSymbolsStyle`
    - swipe mode -> `swipeUpAction` / `swipeDownAction`
@@ -115,6 +138,7 @@ Notes:
    - `jsonnet -e "(import '<keyboard-root>/jsonnet/entries/alphabetic_26.jsonnet').new('light','portrait')"`
 8. If iPad also changed, additionally validate:
    - `jsonnet -e "(import '<keyboard-root>/jsonnet/entries/ipad_pinyin_26.jsonnet').new('light','portrait')"`
+   - `jsonnet -e "(import '<keyboard-root>/jsonnet/entries/ipad_alphabetic_26.jsonnet').new('light','portrait')"`
 
 ## Change 9-key bottom-row button order
 

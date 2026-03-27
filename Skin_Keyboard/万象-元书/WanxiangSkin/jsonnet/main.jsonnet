@@ -9,7 +9,7 @@ local config = {
     iPad: {
       portrait: 'ipad_pinyin_26_portrait',
       landscape: 'ipad_pinyin_26_landscape',
-      floating: 'ipad_pinyin_26_portrait',
+      floating: 'pinyin_26_portrait',
     },
   },
   alphabetic: {
@@ -20,7 +20,7 @@ local config = {
     iPad: {
       portrait: 'ipad_alphabetic_26_portrait',
       landscape: 'ipad_alphabetic_26_landscape',
-      floating: 'ipad_alphabetic_26_portrait',
+      floating: 'alphabetic_26_portrait',
     },
   },
   numeric: {
@@ -31,7 +31,7 @@ local config = {
     iPad: {
       portrait: 'ipad_numeric_9_portrait',
       landscape: 'ipad_numeric_9_landscape',
-      floating: 'ipad_numeric_9_portrait',
+      floating: 'numeric_9_portrait',
     },
   },
 
@@ -43,13 +43,16 @@ local config = {
   },
 };
 
+// ※ 首先加载自定义配置,优先使用用户的自定义配置来覆盖一些参数
 local Settings = import 'Custom.libsonnet';
 
+// 获取指定的按键方案
 local pinyin =
   if Settings.keyboard_layout == 18 then import 'keyboards/pinyin18/iPhone.libsonnet'
   else if Settings.keyboard_layout == 14 then import 'keyboards/pinyin14/iPhone.libsonnet'
   else if Settings.keyboard_layout == 9 then import 'keyboards/pinyin9/iPhone.libsonnet'
   else import 'keyboards/pinyin26/iPhone.libsonnet';
+
 local alphabetic = import 'keyboards/alphabetic26/iPhone.libsonnet';
 local numeric = import 'keyboards/numeric9/iPhone.libsonnet';
 local panel = import 'entries/panel.jsonnet';
