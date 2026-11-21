@@ -52,7 +52,7 @@ local createBackslashNotification(key, bounds={}) = {
   build(context, keyboardLayout)::
     local theme = context.theme;
     local orientation = context.orientation;
-    local settings = context.Settings;
+    local settings = context. Settings;
     local includeSemicolon = settings.keyboard_layout == 27;
     local leftEnlargeConfig = leftEnlarge.resolveConfig(settings);
     local leftEnlargeEnabled = leftEnlarge.enabled(context, includeSemicolon, leftEnlargeConfig);
@@ -132,6 +132,8 @@ local createBackslashNotification(key, bounds={}) = {
          {}) +
       keyFactory.backslashNotifications(letterSpecs, createBackslashNotification) +
       systemKeys.buildReusable(context, layout, hintStyles);
+    // 输入状态下 h 上划 = 功能行第 7 个按钮的功能（见 base/swipeRemap.libsonnet 的 preeditPatch）。
+    local keyboardWithPreedit = keyboard + swipeRemap.preeditPatch(context, keyboard);
     // 按键单独配色（见 design/keyPalette.libsonnet）。
-    keyColors.apply(keyboard, theme, orientation, settings),
+    keyColors.apply(keyboardWithPreedit, theme, orientation, settings),
 }
