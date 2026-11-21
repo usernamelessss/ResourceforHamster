@@ -38,8 +38,10 @@
   // 功能按键配置
   function_button_config: {
     // 是否启用功能行（按设备区分）
+    // iPhone 已关闭：功能行的编辑功能改到 x / c / v / a 的上下划上（见 keyboards/keyboard26/base/swipeRemap.libsonnet）。
+    // 改回 true 即恢复功能行和原来的上下划。
     with_functions_row: {
-      iPhone: true,
+      iPhone: false,
       iPad: false,
     },
 

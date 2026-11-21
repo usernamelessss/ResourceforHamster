@@ -6,6 +6,9 @@ local styleFactories = import '../../../design/styleFactories.libsonnet';
 {
   getKeyboardLayout(theme, Settings=null)::
     local use27Key = Settings != null && std.objectHas(Settings, 'keyboard_layout') && Settings.keyboard_layout == 27;
+    local withFunctionsRow = Settings == null || Settings.function_button_config.with_functions_row.iPhone;
+    // 功能行占 0.17；关掉功能行时把这部分高度还给按键区，键盘总高度不变、每行按键变高。
+    local mainHeight = if withFunctionsRow then 0.73 else 0.73 + 0.17;
     local makeKeyboardBackgroundStyle() =
       styleFactories.makeGeometryStyle(color[theme]['键盘背景颜色']);
     {
@@ -81,7 +84,7 @@ local styleFactories = import '../../../design/styleFactories.libsonnet';
         ],
         keyboardStyle: {
           size: {
-            height: { percentage: 0.73 },
+            height: { percentage: mainHeight },
           },
           insets: {
             top: 3,
@@ -210,7 +213,7 @@ local styleFactories = import '../../../design/styleFactories.libsonnet';
         ],
         keyboardStyle: {
           size: {
-            height: { percentage: 0.73 },
+            height: { percentage: mainHeight },
           },
           insets: {
             top: 3,
@@ -308,7 +311,7 @@ local styleFactories = import '../../../design/styleFactories.libsonnet';
         ],
         keyboardStyle: {
           size: {
-            height: { percentage: 0.73 },
+            height: { percentage: mainHeight },
           },
           insets: {
             top: 3,
@@ -437,7 +440,7 @@ local styleFactories = import '../../../design/styleFactories.libsonnet';
         ],
         keyboardStyle: {
           size: {
-            height: { percentage: 0.73 },
+            height: { percentage: mainHeight },
           },
           insets: {
             top: 3,

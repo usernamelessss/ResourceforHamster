@@ -9,6 +9,7 @@ local hintSymbolsStyles = import '../../../components/key/longPress.libsonnet';
 local keyFactory = import '../../../components/key/factory.libsonnet';
 local baseKeyStyles = import '../../../design/baseKeyStyles.libsonnet';
 local letter26KeysSpecs = import '../base/letters.libsonnet';
+local swipeRemap = import '../base/swipeRemap.libsonnet';
 local others = appearance.others;
 local swipeStyles = import '../../../components/key/swipe.libsonnet';
 local systemKeys = import '../../../components/systemKeys/index.libsonnet';
@@ -58,8 +59,12 @@ local createBackslashNotification(key, bounds={}) = {
       if leftEnlargeEnabled then leftEnlarge.patchLayout(keyboardLayout, leftEnlargeConfig) else keyboardLayout;
     local swipeAssistMode = swipeAssist.resolveSwipeAssistMode(context);
     local swipeDataRoot = pinyinData.genSwipeData(context.deviceType);
-    local rawSwipeUp = if std.objectHas(swipeDataRoot, 'swipe_up') then swipeDataRoot.swipe_up else {};
-    local rawSwipeDown = if std.objectHas(swipeDataRoot, 'swipe_down') then swipeDataRoot.swipe_down else {};
+    local dataSwipeUp = if std.objectHas(swipeDataRoot, 'swipe_up') then swipeDataRoot.swipe_up else {};
+    local dataSwipeDown = if std.objectHas(swipeDataRoot, 'swipe_down') then swipeDataRoot.swipe_down else {};
+    // 去掉功能行时，把编辑功能挪到字母键上下划（见 base/swipeRemap.libsonnet）。
+    local remapped = swipeRemap.apply(context, 'pinyin', dataSwipeUp, dataSwipeDown);
+    local rawSwipeUp = remapped.up;
+    local rawSwipeDown = remapped.down;
     local swipeUp = rawSwipeUp;
     local swipeDown = rawSwipeDown;
     local baseLetterSpecs = letter26KeysSpecs.get26KeySpecs(orientation, layout, includeSemicolon);
