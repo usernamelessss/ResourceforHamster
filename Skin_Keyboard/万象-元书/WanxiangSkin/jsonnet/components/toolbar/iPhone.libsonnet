@@ -96,8 +96,8 @@ local getToolBar(theme, overrides={}) =
     foregroundStyle: foregroundStyle,
     action: action,
   } + extra;
-  // 工具栏中间按钮图标：浅色 airtag，深色 airtag.fill。
-  local menuOrPanelSymbol = if theme == 'dark' then 'airtag.fill' else 'airtag';
+  // 工具栏中间按钮图标：浅色 swirl.circle.righthalf.filled.inverse，深色 swirl.circle.righthalf.filled。
+  local menuOrPanelSymbol = if theme == 'dark' then 'swirl.circle.righthalf.filled' else 'swirl.circle.righthalf.filled.inverse';
 
 
   {
