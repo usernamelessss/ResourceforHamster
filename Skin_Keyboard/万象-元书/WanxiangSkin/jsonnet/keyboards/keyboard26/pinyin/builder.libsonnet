@@ -13,6 +13,7 @@ local others = appearance.others;
 local swipeStyles = import '../../../components/key/swipe.libsonnet';
 local systemKeys = import '../../../components/systemKeys/index.libsonnet';
 local swipeAssist = import './swipeAssist.libsonnet';
+local leftEnlarge = import './leftEnlarge.libsonnet';
 local toolbar = import '../../../components/toolbar/iPhone.libsonnet';
 local functionRow = import '../../../components/functionRow/index.libsonnet';
 local functionButtonStyles = import '../../../components/functionRow/styles.libsonnet';
@@ -51,13 +52,19 @@ local createBackslashNotification(key, bounds={}) = {
     local orientation = context.orientation;
     local settings = context.Settings;
     local includeSemicolon = settings.keyboard_layout == 27;
+    local leftEnlargeConfig = leftEnlarge.resolveConfig(settings);
+    local leftEnlargeEnabled = leftEnlarge.enabled(context, includeSemicolon, leftEnlargeConfig);
+    local layout =
+      if leftEnlargeEnabled then leftEnlarge.patchLayout(keyboardLayout, leftEnlargeConfig) else keyboardLayout;
     local swipeAssistMode = swipeAssist.resolveSwipeAssistMode(context);
     local swipeDataRoot = pinyinData.genSwipeData(context.deviceType);
     local rawSwipeUp = if std.objectHas(swipeDataRoot, 'swipe_up') then swipeDataRoot.swipe_up else {};
     local rawSwipeDown = if std.objectHas(swipeDataRoot, 'swipe_down') then swipeDataRoot.swipe_down else {};
     local swipeUp = rawSwipeUp;
     local swipeDown = rawSwipeDown;
-    local letterSpecs = letter26KeysSpecs.get26KeySpecs(orientation, keyboardLayout, includeSemicolon);
+    local baseLetterSpecs = letter26KeysSpecs.get26KeySpecs(orientation, layout, includeSemicolon);
+    local letterSpecs =
+      if leftEnlargeEnabled then leftEnlarge.patchLetterSpecs(baseLetterSpecs, leftEnlargeConfig) else baseLetterSpecs;
     local letterKeys = [spec.key for spec in letterSpecs];
     local hintData =
       if swipeAssistMode == 'up' then
@@ -85,14 +92,14 @@ local createBackslashNotification(key, bounds={}) = {
     local enableSwipeUpAssistHint = !swipeAssist.assistedDirectionEnabled(swipeAssistMode, 'up');
     local enableSwipeDownAssistHint = !swipeAssist.assistedDirectionEnabled(swipeAssistMode, 'down');
     local createButton = self.createButtonFactory(context, swipeUp, swipeDown, letter26KeysSpecs.getLetters(includeSemicolon), swipeAssistMode, rawSwipeUp, rawSwipeDown);
-    keyboardLayout[if orientation == 'portrait' then '竖屏中文26键' else '横屏中文26键'] +
+    layout[if orientation == 'portrait' then '竖屏中文26键' else '横屏中文26键'] +
     swipeStyles.getStyle('cn', theme, swipeUp, swipeDown) +
     hintStyles +
     toolbar.getToolBar(theme) +
     keyFactory.genPinyinStyles(fontSize, color, theme, center) +
     functionButtonStyles.genFuncKeyStyles(fontSize, color, theme, center) +
     swipeStyles.slideButtonStyles(theme) +
-    functionRow.makeFunctionButtons(orientation, keyboardLayout, 'pinyin') +
+    functionRow.makeFunctionButtons(orientation, layout, 'pinyin') +
     baseKeyStyles.baseStyles(theme, orientation, settings, color, animation, hintSymbolsStyles) +
     {
       preeditHeight: others[if orientation == 'portrait' then '竖屏' else '横屏']['preedit高度'],
@@ -117,5 +124,5 @@ local createBackslashNotification(key, bounds={}) = {
      else
        {}) +
     keyFactory.backslashNotifications(letterSpecs, createBackslashNotification) +
-    systemKeys.buildReusable(context, keyboardLayout, hintStyles),
+    systemKeys.buildReusable(context, layout, hintStyles),
 }
