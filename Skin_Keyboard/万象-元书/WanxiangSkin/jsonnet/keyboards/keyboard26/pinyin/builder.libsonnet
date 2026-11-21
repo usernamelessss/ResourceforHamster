@@ -92,10 +92,10 @@ local createBackslashNotification(key, bounds={}) = {
     local enableSwipeUpAssistHint = !swipeAssist.assistedDirectionEnabled(swipeAssistMode, 'up');
     local enableSwipeDownAssistHint = !swipeAssist.assistedDirectionEnabled(swipeAssistMode, 'down');
     local createButton = self.createButtonFactory(context, swipeUp, swipeDown, letter26KeysSpecs.getLetters(includeSemicolon), swipeAssistMode, rawSwipeUp, rawSwipeDown);
-    (if leftEnlargeEnabled && std.objectHas(leftEnlargeConfig, 'row_heights') then
-    leftEnlarge.patchRowHeights(layout['竖屏中文26键'], leftEnlargeConfig.row_heights)
-    else
-    layout[if orientation == 'portrait' then '竖屏中文26键' else '横屏中文26键']) +
+    (if leftEnlargeEnabled then
+       leftEnlarge.patchPortraitLayout(layout['竖屏中文26键'], leftEnlargeConfig)
+     else
+       layout[if orientation == 'portrait' then '竖屏中文26键' else '横屏中文26键']) +
     swipeStyles.getStyle('cn', theme, swipeUp, swipeDown) +
     hintStyles +
     toolbar.getToolBar(theme) +

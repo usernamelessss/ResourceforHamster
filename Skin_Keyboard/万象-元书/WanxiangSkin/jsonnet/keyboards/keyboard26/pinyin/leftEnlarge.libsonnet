@@ -1,24 +1,31 @@
 // 中文 26 键竖屏左侧放大：前四列字母键从左到右递减，右侧字母键与系统键让出宽度。
+// 可选 move_ep_to_bottom：把 e、p 按键原样移到底行空格右侧，只改位置不改功能。
 local sum(arr) = std.foldl(function(acc, x) acc + x, arr, 0);
 local pct(x) = { width: { percentage: x } };
-// 生成 bounds 使用的分数字符串，例如 '125/160'。
 local ratio(part, whole) =
   std.toString(std.floor(part * 1000 + 0.5)) + '/' + std.toString(std.floor(whole * 1000 + 0.5));
-
-local row1Keys = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'];
+local allRow1Keys = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'];
 local row2Keys = ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'];
 local row3Keys = ['z', 'x', 'c', 'v', 'b', 'n', 'm'];
+local movedKeys = ['e', 'p'];
+
+local moveEp(cfg) = std.objectHas(cfg, 'move_ep_to_bottom') && cfg.move_ep_to_bottom;
+local row1KeysOf(cfg) =
+  if moveEp(cfg) then std.filter(function(k) !std.member(movedKeys, k), allRow1Keys) else allRow1Keys;
+local bottomKeysOf(cfg) =
+  ['123', 'comma', 'space', 'cn2en', 'enter'] + (if moveEp(cfg) then movedKeys else []);
+local cellName(v) = if std.objectHas(v, 'Cell') then v.Cell else null;
+local isMovedCell(v) = std.member([k + 'Button' for k in movedKeys], cellName(v));
 
 {
-  // 仅竖屏、非 27 键且开关开启时生效。
   enabled(context, includeSemicolon)::
-    context.orientation == 'portrait'
-    && !includeSemicolon
+    context.orientation == 'portrait' && !includeSemicolon
     && std.objectHas(context.Settings, 'left_enlarge_config')
     && context.Settings.left_enlarge_config.enable,
 
-  // 覆写竖屏系统键尺寸；spaceLeftButton（逗号句号）读取的是 spaceRight键size。
   patchLayout(keyboardLayout, cfg)::
+    local bottomSum = sum([cfg.bottom[k] for k in bottomKeysOf(cfg)]);
+    assert std.abs(bottomSum - 1) < 0.002 : 'left_enlarge_config.bottom 之和应为 1，当前为 ' + bottomSum;
     keyboardLayout + {
       '竖屏按键尺寸'+: {
         'shift键size': pct(cfg.shift),
@@ -31,8 +38,8 @@ local row3Keys = ['z', 'x', 'c', 'v', 'b', 'n', 'm'];
       },
     },
 
-  // 按行重算字母键宽度；a、l 两端保留隐形触控余量。
   patchLetterSpecs(letterSpecs, cfg)::
+    local row1Keys = row1KeysOf(cfg);
     local margin = cfg.row2_edge_margin;
     local row1Rest = (1 - sum(cfg.row1)) / (std.length(row1Keys) - std.length(cfg.row1));
     local row2Rest = (1 - sum(cfg.row2) - 2 * margin) / (std.length(row2Keys) - std.length(cfg.row2));
@@ -42,46 +49,44 @@ local row3Keys = ['z', 'x', 'c', 'v', 'b', 'n', 'm'];
       [keys[i]]: if i < std.length(lefts) then lefts[i] else rest
       for i in std.range(0, std.length(keys) - 1)
     };
-    local widths =
-      sized(row1Keys, cfg.row1, row1Rest) +
-      sized(row2Keys, cfg.row2, row2Rest) +
-      sized(row3Keys, cfg.row3, row3Rest);
+    local movedWidths = if moveEp(cfg) then { [k]: cfg.bottom[k] for k in movedKeys } else {};
+    local widths = sized(row1Keys, cfg.row1, row1Rest) + sized(row2Keys, cfg.row2, row2Rest)
+                   + sized(row3Keys, cfg.row3, row3Rest) + movedWidths;
     [
       local w = widths[spec.key];
       spec + (
-        if spec.key == 'a' then {
-          size: pct(w + margin),
-          bounds: { width: ratio(w, w + margin), alignment: 'right' },
-        } else if spec.key == 'l' then {
-          size: pct(w + margin),
-          bounds: { width: ratio(w, w + margin), alignment: 'left' },
-        } else {
-          size: pct(w),
-          bounds: {},
-        }
+        if spec.key == 'a' then { size: pct(w + margin), bounds: { width: ratio(w, w + margin), alignment: 'right' } }
+        else if spec.key == 'l' then { size: pct(w + margin), bounds: { width: ratio(w, w + margin), alignment: 'left' } }
+        else { size: pct(w), bounds: {} }
       )
       for spec in letterSpecs
     ],
-  // 给竖屏四行按键分别加行高样式；功能行保持原样。
-  patchRowHeights(layoutDef, heights)::
-    assert std.length(heights) == 4 : 'row_heights 需要 4 个值';
-    assert std.abs(sum(heights) - 1) < 0.002 : 'row_heights 之和应为 1';
+
+  // 处理竖屏中文 26 键的行结构：按需移动 e/p，按需设置行高。
+  patchPortraitLayout(layoutDef, cfg)::
+    local heights = if std.objectHas(cfg, 'row_heights') then cfg.row_heights else null;
+    assert heights == null || std.length(heights) == 4 : 'row_heights 需要 4 个值';
+    assert heights == null || std.abs(sum(heights) - 1) < 0.002 : 'row_heights 之和应为 1';
     local styleName(i) = 'leftEnlargeRow' + (i + 1) + 'Style';
-    local withStyle(row, i) = row { HStack+: { style: styleName(i) } };
+    local moveSubviews(subs, i) =
+      if !moveEp(cfg) then subs
+      else if i == 0 then std.filter(function(v) !isMovedCell(v), subs)
+      else if i == 3 then std.flattenArrays([
+        if cellName(v) == 'spaceButton' then [v] + [{ Cell: k + 'Button' } for k in movedKeys] else [v]
+        for v in subs
+      ])
+      else subs;
+    local patchRow(row, i) =
+      row {
+        HStack+: { subviews: moveSubviews(row.HStack.subviews, i) }
+                 + (if heights != null then { style: styleName(i) } else {}),
+      };
     layoutDef {
       keyboardLayout: [
         if std.objectHas(item, 'HStack') && std.objectHas(item.HStack, 'style') && item.HStack.style == 'keyboardStyle' then
-          item {
-            HStack+: {
-              subviews: [withStyle(item.HStack.subviews[i], i) for i in std.range(0, std.length(item.HStack.subviews) - 1)],
-            },
-          }
-        else
-          item
+          item { HStack+: { subviews: [patchRow(item.HStack.subviews[i], i) for i in std.range(0, std.length(item.HStack.subviews) - 1)] } }
+        else item
         for item in layoutDef.keyboardLayout
       ],
-    } + {
-      [styleName(i)]: { size: { height: { percentage: heights[i] } } }
-      for i in std.range(0, 3)
-    },
+    } + (if heights != null then { [styleName(i)]: { size: { height: { percentage: heights[i] } } } for i in std.range(0, 3) } else {}),
 }
