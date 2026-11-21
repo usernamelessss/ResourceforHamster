@@ -1,5 +1,6 @@
 // 中文 26 键竖屏左侧放大：前四列字母键从左到右递减，右侧字母键与系统键让出宽度。
-// 可选 move_ep_to_bottom：把 e、p 按键原样移到底行空格右侧，只改位置不改功能。
+// 可选 move_ep_to_bottom：把 e、p 按键原样移到底行，只改位置不改功能。
+// 开启后底行顺序：123 ，。 中英 空格 p e 换行
 local sum(arr) = std.foldl(function(acc, x) acc + x, arr, 0);
 local pct(x) = { width: { percentage: x } };
 local ratio(part, whole) =
@@ -7,7 +8,8 @@ local ratio(part, whole) =
 local allRow1Keys = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'];
 local row2Keys = ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'];
 local row3Keys = ['z', 'x', 'c', 'v', 'b', 'n', 'm'];
-local movedKeys = ['e', 'p'];
+// 移到空格右侧的字母键，按显示顺序排列
+local movedKeys = ['p', 'e'];
 
 local moveEp(cfg) = std.objectHas(cfg, 'move_ep_to_bottom') && cfg.move_ep_to_bottom;
 local row1KeysOf(cfg) =
@@ -16,6 +18,17 @@ local bottomKeysOf(cfg) =
   ['123', 'comma', 'space', 'cn2en', 'enter'] + (if moveEp(cfg) then movedKeys else []);
 local cellName(v) = if std.objectHas(v, 'Cell') then v.Cell else null;
 local isMovedCell(v) = std.member([k + 'Button' for k in movedKeys], cellName(v));
+local isCn2enCell(v) = cellName(v) == 'cn2enButton';
+
+// 底行重排：中英键移到空格左侧，e/p 插在空格右侧。
+local reorderBottom(subs) =
+  local cn2enCells = std.filter(isCn2enCell, subs);
+  std.flattenArrays([
+    if isCn2enCell(v) then []
+    else if cellName(v) == 'spaceButton' then cn2enCells + [v] + [{ Cell: k + 'Button' } for k in movedKeys]
+    else [v]
+    for v in subs
+  ]);
 
 {
   enabled(context, includeSemicolon)::
@@ -62,7 +75,7 @@ local isMovedCell(v) = std.member([k + 'Button' for k in movedKeys], cellName(v)
       for spec in letterSpecs
     ],
 
-  // 处理竖屏中文 26 键的行结构：按需移动 e/p，按需设置行高。
+  // 处理竖屏中文 26 键的行结构：按需移动 e/p 和中英键，按需设置行高。
   patchPortraitLayout(layoutDef, cfg)::
     local heights = if std.objectHas(cfg, 'row_heights') then cfg.row_heights else null;
     assert heights == null || std.length(heights) == 4 : 'row_heights 需要 4 个值';
@@ -71,10 +84,7 @@ local isMovedCell(v) = std.member([k + 'Button' for k in movedKeys], cellName(v)
     local moveSubviews(subs, i) =
       if !moveEp(cfg) then subs
       else if i == 0 then std.filter(function(v) !isMovedCell(v), subs)
-      else if i == 3 then std.flattenArrays([
-        if cellName(v) == 'spaceButton' then [v] + [{ Cell: k + 'Button' } for k in movedKeys] else [v]
-        for v in subs
-      ])
+      else if i == 3 then reorderBottom(subs)
       else subs;
     local patchRow(row, i) =
       row {
