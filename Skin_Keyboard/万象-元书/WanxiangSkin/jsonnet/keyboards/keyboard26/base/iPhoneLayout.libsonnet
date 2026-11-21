@@ -66,10 +66,10 @@ local styleFactories = import '../../../design/styleFactories.libsonnet';
                   HStack: {
                     subviews: [
                       { Cell: '123Button' },
-                      // { Cell: 'cn2enButton' },
-                      { Cell: 'spaceLeftButton' },
-                      { Cell: 'spaceButton' },
+                      // 中英键与「°，」键对调：中英在空格左侧，「°，」在空格右侧。
                       { Cell: 'cn2enButton' },
+                      { Cell: 'spaceButton' },
+                      { Cell: 'spaceLeftButton' },
                       // { Cell: 'spaceRightButton' },
                       { Cell: 'enterButton' },
                     ],
