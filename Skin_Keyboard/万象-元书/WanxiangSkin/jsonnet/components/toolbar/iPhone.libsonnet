@@ -96,6 +96,8 @@ local getToolBar(theme, overrides={}) =
     foregroundStyle: foregroundStyle,
     action: action,
   } + extra;
+  // 工具栏中间按钮图标：浅色 airtag，深色 airtag.fill。
+  local menuOrPanelSymbol = if theme == 'dark' then 'airtag.fill' else 'airtag';
 
 
   {
@@ -159,12 +161,12 @@ local getToolBar(theme, overrides={}) =
       shortcut: '#keyboardMenu',
     }),
 
-    toolbarButtonOpenAppMenuForegroundStyle: makeToolbarSystemImageForegroundStyle('hexagon.righthalf.filled'),
+    toolbarButtonOpenAppMenuForegroundStyle: makeToolbarSystemImageForegroundStyle(menuOrPanelSymbol),
     // menu_or_panel 在固定按钮场景下会直接引用这个样式对象。
     toolbarButtonPanelStyle: makeToolbarButtonStyle('toolbarButtonPanelForegroundStyle', {
       floatKeyboardType: 'panel',
     }),
-    toolbarButtonPanelForegroundStyle: makeToolbarSystemImageForegroundStyle('hexagon.righthalf.filled'),
+    toolbarButtonPanelForegroundStyle: makeToolbarSystemImageForegroundStyle(menuOrPanelSymbol),
     // iPad 首位固定按钮在 toolbar_menu=false 时使用这个样式，动作是直接打开 App。
     toolbarButtonOpenAppStyle: makeToolbarButtonStyle('toolbarButtonOpenAppForegroundStyle', {
       openURL: 'hamster3://',
