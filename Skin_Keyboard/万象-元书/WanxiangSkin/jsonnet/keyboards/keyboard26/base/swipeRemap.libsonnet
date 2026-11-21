@@ -90,7 +90,7 @@ local preeditKey(keyboard, key, dir, newAction, icon) =
 
   // 中文 26 键输入状态（有预编辑）时：
   //   h 上划：功能行第 7 个按钮（tail）在输入中的功能，向方案发送 backslash。
-  //   z 下划：简繁切换，发送万象 key_binder 里绑定 s2t 的 Control+Shift+4，当前候选立即刷新。z 上划保持 Tab。
+  //   z 下划：直接切换 RIME 开关 s2t（万象 simplifier@s2t 依据它做简转繁）。z 上划保持 Tab。
   preeditPatch(context, keyboard)::
     if !self.enabled(context) then {}
     else
@@ -107,7 +107,7 @@ local preeditKey(keyboard, key, dir, newAction, icon) =
         keyboard,
         'z',
         'Down',
-        { sendKeys: 'Control+Shift+4' },
+        { rimeOption: 's2t' },
         if dark then 'arrow.trianglehead.2.clockwise.rotate.90.circle.fill' else 'arrow.trianglehead.2.clockwise.rotate.90.circle'
       ),
 }
