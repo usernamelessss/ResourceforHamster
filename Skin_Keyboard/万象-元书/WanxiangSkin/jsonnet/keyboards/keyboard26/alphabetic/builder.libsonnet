@@ -3,6 +3,7 @@ local appearance = import '../../../design/appearance.libsonnet';
 local center = appearance.center;
 local color = appearance.color;
 local fontSize = appearance.fontSize;
+local keyColors = import '../../../design/keyColors.libsonnet';
 local alphabeticData = import './data.libsonnet';
 local hintSymbolsStyles = import '../../../components/key/longPress.libsonnet';
 local keyFactory = import '../../../components/key/factory.libsonnet';
@@ -40,20 +41,23 @@ local toolbarOverrides = {
     local letterSpecs = letter26KeysSpecs.get26KeySpecs(orientation, keyboardLayout);
     local letterKeys = [spec.key for spec in letterSpecs];
     local createButton = self.createButtonFactory(context, swipeUp, swipeDown);
-    keyboardLayout[if orientation == 'portrait' then '竖屏英文26键' else '横屏英文26键'] +
-    swipeStyles.getStyle('en', theme, swipeUp, swipeDown) +
-    hintStyles +
-    toolbar.getToolBar(theme, toolbarOverrides) +
-    keyFactory.genAlphabeticStyles(fontSize, color, theme, center) +
-    functionButtonStyles.genFuncKeyStyles(fontSize, color, theme, center) +
-    swipeStyles.slideButtonStyles(theme) +
-    functionRow.makeFunctionButtons(orientation, keyboardLayout, 'alphabetic') +
-    {
-      preeditHeight: others[if orientation == 'portrait' then '竖屏' else '横屏']['preedit高度'],
-      toolbarHeight: others[if orientation == 'portrait' then '竖屏' else '横屏']['toolbar高度'],
-      keyboardHeight: others[if orientation == 'portrait' then '竖屏' else '横屏']['keyboard高度'],
-    } +
-    keyFactory.letterButtons(letterSpecs, createButton, hintStyles) +
-    keyFactory.hintStyles(letterKeys) +
-    systemKeysAlphabetic26.build(theme, orientation, keyboardLayout, context.Settings, createButton, hintStyles),
+    local keyboard =
+      keyboardLayout[if orientation == 'portrait' then '竖屏英文26键' else '横屏英文26键'] +
+      swipeStyles.getStyle('en', theme, swipeUp, swipeDown) +
+      hintStyles +
+      toolbar.getToolBar(theme, toolbarOverrides) +
+      keyFactory.genAlphabeticStyles(fontSize, color, theme, center) +
+      functionButtonStyles.genFuncKeyStyles(fontSize, color, theme, center) +
+      swipeStyles.slideButtonStyles(theme) +
+      functionRow.makeFunctionButtons(orientation, keyboardLayout, 'alphabetic') +
+      {
+        preeditHeight: others[if orientation == 'portrait' then '竖屏' else '横屏']['preedit高度'],
+        toolbarHeight: others[if orientation == 'portrait' then '竖屏' else '横屏']['toolbar高度'],
+        keyboardHeight: others[if orientation == 'portrait' then '竖屏' else '横屏']['keyboard高度'],
+      } +
+      keyFactory.letterButtons(letterSpecs, createButton, hintStyles) +
+      keyFactory.hintStyles(letterKeys) +
+      systemKeysAlphabetic26.build(theme, orientation, keyboardLayout, context.Settings, createButton, hintStyles);
+    // 按键单独配色（见 design/keyPalette.libsonnet）。
+    keyColors.apply(keyboard, theme, orientation, context.Settings),
 }

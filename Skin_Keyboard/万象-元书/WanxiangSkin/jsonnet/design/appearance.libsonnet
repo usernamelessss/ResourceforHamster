@@ -148,6 +148,8 @@
   // 浅色与深色主题颜色令牌。
   color: (
     local Settings = import '../Custom.libsonnet';
+    // 按键配色方案（keyPalette.libsonnet）；enable 为 false 时不覆盖。
+    local palette = import './keyPalette.libsonnet';
 
     local base_light = {
       '字母键背景颜色-普通': 'FFFFFFCC',
@@ -269,8 +271,8 @@
     };
 
     {
-      light: if Settings.ios26_style then ios26_light else base_light,
-      dark: if Settings.ios26_style then ios26_dark else base_dark,
+      light: (if Settings.ios26_style then ios26_light else base_light) + (if palette.enable then palette.light.colors else {}),
+      dark: (if Settings.ios26_style then ios26_dark else base_dark) + (if palette.enable then palette.dark.colors else {}),
     }
   ),
 

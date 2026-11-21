@@ -4,6 +4,7 @@ local animation = appearance.animation;
 local center = appearance.center;
 local color = appearance.color;
 local fontSize = appearance.fontSize;
+local keyColors = import '../../../design/keyColors.libsonnet';
 local pinyinData = import './data.libsonnet';
 local hintSymbolsStyles = import '../../../components/key/longPress.libsonnet';
 local keyFactory = import '../../../components/key/factory.libsonnet';
@@ -97,37 +98,40 @@ local createBackslashNotification(key, bounds={}) = {
     local enableSwipeUpAssistHint = !swipeAssist.assistedDirectionEnabled(swipeAssistMode, 'up');
     local enableSwipeDownAssistHint = !swipeAssist.assistedDirectionEnabled(swipeAssistMode, 'down');
     local createButton = self.createButtonFactory(context, swipeUp, swipeDown, letter26KeysSpecs.getLetters(includeSemicolon), swipeAssistMode, rawSwipeUp, rawSwipeDown);
-    layout[if orientation == 'portrait' then '竖屏中文26键' else '横屏中文26键'] +
-    swipeStyles.getStyle('cn', theme, swipeUp, swipeDown) +
-    hintStyles +
-    toolbar.getToolBar(theme) +
-    keyFactory.genPinyinStyles(fontSize, color, theme, center) +
-    functionButtonStyles.genFuncKeyStyles(fontSize, color, theme, center) +
-    swipeStyles.slideButtonStyles(theme) +
-    functionRow.makeFunctionButtons(orientation, layout, 'pinyin') +
-    baseKeyStyles.baseStyles(theme, orientation, settings, color, animation, hintSymbolsStyles) +
-    {
-      preeditHeight: others[if orientation == 'portrait' then '竖屏' else '横屏']['preedit高度'],
-      toolbarHeight: others[if orientation == 'portrait' then '竖屏' else '横屏']['toolbar高度'],
-      keyboardHeight: others[if orientation == 'portrait' then '竖屏' else '横屏']['keyboard高度'],
-    } +
-    keyFactory.letterButtons(letterSpecs, createButton, hintStyles) +
-    keyFactory.hintStyles(letterKeys) +
-    (if swipeAssistMode != 'none' then
-       keyFactory.hintStyles(
-         letterKeys,
-         'alphabeticHintBackgroundStyle',
-         enableSwipeUpAssistHint,
-         enableSwipeDownAssistHint,
-         'ButtonSwipeAssistHintStyle'
-       )
-     else
-       {}) +
-    extra27HintStyles +
-    (if swipeAssistMode != 'none' then
-       swipeAssist.swipeAssistNotifications(letterSpecs, settings, rawSwipeUp, rawSwipeDown, swipeAssistMode)
-     else
-       {}) +
-    keyFactory.backslashNotifications(letterSpecs, createBackslashNotification) +
-    systemKeys.buildReusable(context, layout, hintStyles),
+    local keyboard =
+      layout[if orientation == 'portrait' then '竖屏中文26键' else '横屏中文26键'] +
+      swipeStyles.getStyle('cn', theme, swipeUp, swipeDown) +
+      hintStyles +
+      toolbar.getToolBar(theme) +
+      keyFactory.genPinyinStyles(fontSize, color, theme, center) +
+      functionButtonStyles.genFuncKeyStyles(fontSize, color, theme, center) +
+      swipeStyles.slideButtonStyles(theme) +
+      functionRow.makeFunctionButtons(orientation, layout, 'pinyin') +
+      baseKeyStyles.baseStyles(theme, orientation, settings, color, animation, hintSymbolsStyles) +
+      {
+        preeditHeight: others[if orientation == 'portrait' then '竖屏' else '横屏']['preedit高度'],
+        toolbarHeight: others[if orientation == 'portrait' then '竖屏' else '横屏']['toolbar高度'],
+        keyboardHeight: others[if orientation == 'portrait' then '竖屏' else '横屏']['keyboard高度'],
+      } +
+      keyFactory.letterButtons(letterSpecs, createButton, hintStyles) +
+      keyFactory.hintStyles(letterKeys) +
+      (if swipeAssistMode != 'none' then
+         keyFactory.hintStyles(
+           letterKeys,
+           'alphabeticHintBackgroundStyle',
+           enableSwipeUpAssistHint,
+           enableSwipeDownAssistHint,
+           'ButtonSwipeAssistHintStyle'
+         )
+       else
+         {}) +
+      extra27HintStyles +
+      (if swipeAssistMode != 'none' then
+         swipeAssist.swipeAssistNotifications(letterSpecs, settings, rawSwipeUp, rawSwipeDown, swipeAssistMode)
+       else
+         {}) +
+      keyFactory.backslashNotifications(letterSpecs, createBackslashNotification) +
+      systemKeys.buildReusable(context, layout, hintStyles);
+    // 按键单独配色（见 design/keyPalette.libsonnet）。
+    keyColors.apply(keyboard, theme, orientation, settings),
 }
