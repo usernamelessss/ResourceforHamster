@@ -9,6 +9,7 @@ local hintSymbolsStyles = import '../../../components/key/longPress.libsonnet';
 local keyFactory = import '../../../components/key/factory.libsonnet';
 local letter26KeysSpecs = import '../base/letters.libsonnet';
 local swipeRemap = import '../base/swipeRemap.libsonnet';
+local leftEnlarge = import '../pinyin/leftEnlarge.libsonnet';
 local others = appearance.others;
 local swipeStyles = import '../../../components/key/swipe.libsonnet';
 local toolbar = import '../../../components/toolbar/iPhone.libsonnet';
@@ -30,6 +31,11 @@ local toolbarOverrides = {
   build(context, keyboardLayout)::
     local theme = context.theme;
     local orientation = context.orientation;
+    // 左侧放大与中文 26 键共用同一份配置（见 pinyin/leftEnlarge.libsonnet），保持中英文布局一致。
+    local leftEnlargeConfig = leftEnlarge.resolveConfig(context.Settings);
+    local leftEnlargeEnabled = leftEnlarge.enabled(context, false, leftEnlargeConfig);
+    local layout =
+      if leftEnlargeEnabled then leftEnlarge.patchLayout(keyboardLayout, leftEnlargeConfig) else keyboardLayout;
     local swipeDataRoot = alphabeticData.genSwipeenData(context.deviceType);
     local dataSwipeUp = if std.objectHas(swipeDataRoot, 'swipe_up') then swipeDataRoot.swipe_up else {};
     local dataSwipeDown = if std.objectHas(swipeDataRoot, 'swipe_down') then swipeDataRoot.swipe_down else {};
@@ -38,18 +44,20 @@ local toolbarOverrides = {
     local swipeUp = remapped.up;
     local swipeDown = remapped.down;
     local hintStyles = hintSymbolsStyles.getStyle(theme, alphabeticData.alphabetic);
-    local letterSpecs = letter26KeysSpecs.get26KeySpecs(orientation, keyboardLayout);
+    local baseLetterSpecs = letter26KeysSpecs.get26KeySpecs(orientation, layout);
+    local letterSpecs =
+      if leftEnlargeEnabled then leftEnlarge.patchLetterSpecs(baseLetterSpecs, leftEnlargeConfig) else baseLetterSpecs;
     local letterKeys = [spec.key for spec in letterSpecs];
     local createButton = self.createButtonFactory(context, swipeUp, swipeDown);
     local keyboard =
-      keyboardLayout[if orientation == 'portrait' then '竖屏英文26键' else '横屏英文26键'] +
+      layout[if orientation == 'portrait' then '竖屏英文26键' else '横屏英文26键'] +
       swipeStyles.getStyle('en', theme, swipeUp, swipeDown) +
       hintStyles +
       toolbar.getToolBar(theme, toolbarOverrides) +
       keyFactory.genAlphabeticStyles(fontSize, color, theme, center) +
       functionButtonStyles.genFuncKeyStyles(fontSize, color, theme, center) +
       swipeStyles.slideButtonStyles(theme) +
-      functionRow.makeFunctionButtons(orientation, keyboardLayout, 'alphabetic') +
+      functionRow.makeFunctionButtons(orientation, layout, 'alphabetic') +
       {
         preeditHeight: others[if orientation == 'portrait' then '竖屏' else '横屏']['preedit高度'],
         toolbarHeight: others[if orientation == 'portrait' then '竖屏' else '横屏']['toolbar高度'],
@@ -57,7 +65,7 @@ local toolbarOverrides = {
       } +
       keyFactory.letterButtons(letterSpecs, createButton, hintStyles) +
       keyFactory.hintStyles(letterKeys) +
-      systemKeysAlphabetic26.build(theme, orientation, keyboardLayout, context.Settings, createButton, hintStyles);
+      systemKeysAlphabetic26.build(theme, orientation, layout, context. Settings, createButton, hintStyles);
     // 按键单独配色（见 design/keyPalette.libsonnet）。
     keyColors.apply(keyboard, theme, orientation, context.Settings),
 }
