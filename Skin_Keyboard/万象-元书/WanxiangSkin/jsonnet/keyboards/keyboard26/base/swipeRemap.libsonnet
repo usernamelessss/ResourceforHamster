@@ -9,22 +9,24 @@ local edit = {
   paste: { action: { shortcut: '#paste' }, label: { systemImageName: 'doc.on.clipboard.fill' } },
 };
 
-// 给某个字母键加「输入中」通知：有预编辑时上划换成 swipeUpAction，上划角标换成 icon。
-// 点按、下划保持不变；预编辑清空后按键恢复原样。
-local preeditKey(keyboard, key, swipeUpAction, icon) =
+// 给某个字母键加「输入中」通知：有预编辑时，把 dir（'Up' 或 'Down'）方向的划动换成 newAction，
+// 对应方向的角标换成 icon。点按和另一个方向的划动保持不变；预编辑清空后按键恢复原样。
+local preeditKey(keyboard, key, dir, newAction, icon) =
   local name = key + 'Button';
   if !std.objectHas(keyboard, name) then {}
   else
     local btn = keyboard[name];
-    local upStyle = name + 'UpForegroundStyle';
-    local preeditUpStyle = name + 'PreeditUpForegroundStyle';
+    local dirStyle = name + dir + 'ForegroundStyle';
+    local preeditDirStyle = name + 'Preedit' + dir + 'ForegroundStyle';
     local notificationName = name + 'PreeditNotification';
-    local hasUpStyle = std.objectHas(keyboard, upStyle);
-    local swapUp(names) =
+    local hasDirStyle = std.objectHas(keyboard, dirStyle);
+    local swapStyle(names) =
       if std.type(names) == 'array' then
-        [if n == upStyle then preeditUpStyle else n for n in names]
-      else if names == upStyle then preeditUpStyle
+        [if n == dirStyle then preeditDirStyle else n for n in names]
+      else if names == dirStyle then preeditDirStyle
       else names;
+    local upAction = if dir == 'Up' then newAction else if std.objectHas(btn, 'swipeUpAction') then btn.swipeUpAction else null;
+    local downAction = if dir == 'Down' then newAction else if std.objectHas(btn, 'swipeDownAction') then btn.swipeDownAction else null;
     {
       [name]: btn + {
         notification: [notificationName] + (if std.objectHas(btn, 'notification') then btn.notification else []),
@@ -33,14 +35,14 @@ local preeditKey(keyboard, key, swipeUpAction, icon) =
         notificationType: 'preeditChanged',
         [if std.objectHas(btn, 'backgroundStyle') then 'backgroundStyle']: btn.backgroundStyle,
         [if std.objectHas(btn, 'foregroundStyle') then 'foregroundStyle']:
-          if hasUpStyle then swapUp(btn.foregroundStyle) else btn.foregroundStyle,
+          if hasDirStyle then swapStyle(btn.foregroundStyle) else btn.foregroundStyle,
         [if std.objectHas(btn, 'action') then 'action']: btn.action,
-        swipeUpAction: swipeUpAction,
-        [if std.objectHas(btn, 'swipeDownAction') then 'swipeDownAction']: btn.swipeDownAction,
+        [if upAction != null then 'swipeUpAction']: upAction,
+        [if downAction != null then 'swipeDownAction']: downAction,
       },
     } + (
-      if hasUpStyle then {
-        [preeditUpStyle]: keyboard[upStyle] + {
+      if hasDirStyle then {
+        [preeditDirStyle]: keyboard[dirStyle] + {
           buttonStyleType: 'systemImage',
           systemImageName: icon,
           text:: null,
@@ -62,7 +64,7 @@ local preeditKey(keyboard, key, swipeUpAction, icon) =
         label: { systemImageName: if settings.fix_sf_symbol then 'dollarsign.square.fill' else 'chineseyuanrenminbisign.square.fill' },
       };
       // 中文 h 上划（非输入状态）：直接上屏「/」，不经过方案（万象里单独的 / 会进入符号模式）。
-      // 输入状态下的 h、z 上划由 preeditPatch 处理。
+      // 输入状态下的 h 上划、z 下划由 preeditPatch 处理。
       local keepUp =
         if kind == 'pinyin' then {
           h: { action: { symbol: '/' }, label: { text: '/' } },
@@ -86,9 +88,9 @@ local preeditKey(keyboard, key, swipeUpAction, icon) =
         },
       },
 
-  // 中文 26 键输入状态（有预编辑）时的上划：
-  //   h：功能行第 7 个按钮（tail）在输入中的功能，向方案发送 backslash。
-  //   z：简繁切换，发送万象 key_binder 里绑定 s2t 的 Control+Shift+4，当前候选立即刷新。
+  // 中文 26 键输入状态（有预编辑）时：
+  //   h 上划：功能行第 7 个按钮（tail）在输入中的功能，向方案发送 backslash。
+  //   z 下划：简繁切换，发送万象 key_binder 里绑定 s2t 的 Control+Shift+4，当前候选立即刷新。z 上划保持 Tab。
   preeditPatch(context, keyboard)::
     if !self.enabled(context) then {}
     else
@@ -97,12 +99,14 @@ local preeditKey(keyboard, key, swipeUpAction, icon) =
       preeditKey(
         keyboard,
         'h',
+        'Up',
         { sendKeys: 'backslash' },
         if settings.fix_sf_symbol then 'ellipsis.curlybraces' else 'ellipsis.viewfinder'
       ) +
       preeditKey(
         keyboard,
         'z',
+        'Down',
         { sendKeys: 'Control+Shift+4' },
         if dark then 'arrow.trianglehead.2.clockwise.rotate.90.circle.fill' else 'arrow.trianglehead.2.clockwise.rotate.90.circle'
       ),
