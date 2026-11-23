@@ -3,7 +3,7 @@ name: Create Release (cskin)
 on:
   push:
     tags:
-      - "wanxiangskin-*"
+      - "anymore-hamster-*"
 
 permissions:
   contents: write
@@ -20,12 +20,13 @@ jobs:
       - name: Get commits between tags
         id: commits
         run: |
-          PREV_TAG=$(git tag --list "wanxiangskin-[0-9]*" --sort=-v:refname | grep -Ev "rc|beta|alpha" | head -n 1)
           CURRENT_TAG="${{ github.ref_name }}"
 
-          if [ "$PREV_TAG" = "$CURRENT_TAG" ]; then
-            PREV_TAG=$(git tag --list "wanxiangskin-[0-9]*" --sort=-v:refname | grep -Ev "rc|beta|alpha" | head -n 2 | tail -n 1)
-          fi
+          # 按创建时间倒序取上一个正式版标签（后缀可以是时间戳或文字描述）
+          PREV_TAG=$(git tag --list "anymore-hamster-*" --sort=-creatordate \
+            | grep -vxF "$CURRENT_TAG" \
+            | grep -Ev -- "-(rc|beta|alpha)([.-]|[0-9]|$)" \
+            | head -n 1 || true)
 
           echo "prev_tag=$PREV_TAG" >> "$GITHUB_OUTPUT"
 
